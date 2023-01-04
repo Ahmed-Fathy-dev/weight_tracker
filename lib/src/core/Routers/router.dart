@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-
 import '../../app/features/auth/views/pages/login_page.dart';
+import '../../app/features/home/views/pages/homepage.dart';
 import 'route_name.dart';
 
 class AppRouter {
@@ -9,7 +9,8 @@ class AppRouter {
     switch (settings.name) {
       case '/${RouteName.loginPage}':
         return MaterialPageRoute(builder: (_) => const LoginPage());
-     
+      case '/${RouteName.homePage}':
+        return MaterialPageRoute(builder: (_) => const Homepage());
       // case '/${RouteName.}':
       // return MaterialPageRoute(builder: (_) => const ());
       // case '/${}':

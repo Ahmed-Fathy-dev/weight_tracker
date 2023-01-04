@@ -2,7 +2,8 @@ part of './app_theming.dart';
 
 mixin WidgetAppTheme {
   static AppBarTheme appBarTheme(ColorScheme colorScheme) {
-    return AppBarTheme(
+    return const AppBarTheme(
+      centerTitle: true,
       // toolbarHeight: 50,
       // titleTextStyle: TextStyle(
       //   fontSize: 20,
@@ -10,7 +11,7 @@ mixin WidgetAppTheme {
       // ),
       // actionsIconTheme: IconThemeData(color: colorScheme.onPrimary),
       // iconTheme: IconThemeData(color: colorScheme.onPrimary),
-      color: colorScheme.primary,
+      // color: colorScheme.primary,
       // shadowColor: Colors.transparent,
       // elevation: 0,
       // iconTheme: IconThemeData(color: colorScheme.primary),
