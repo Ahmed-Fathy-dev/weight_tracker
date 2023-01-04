@@ -8,6 +8,7 @@ part 'weight_model.g.dart';
 class WeightModel extends Equatable {
   final String id;
   final String weight;
+  @TimestampConverter()
   final DateTime time;
 
   const WeightModel({
@@ -41,10 +42,26 @@ class WeightModel extends Equatable {
     };
   }
 
+  // static DateTime _fromJson(int int) =>
+  //     DateTime.fromMillisecondsSinceEpoch(int);
+  // static int _toJson(DateTime time) => time.millisecondsSinceEpoch;
+
   @override
   List<Object?> get props => [
         id,
         weight,
         time,
       ];
+}
+
+class TimestampConverter implements JsonConverter<DateTime, Timestamp> {
+  const TimestampConverter();
+
+  @override
+  DateTime fromJson(Timestamp timestamp) {
+    return timestamp.toDate();
+  }
+
+  @override
+  Timestamp toJson(DateTime date) => Timestamp.fromDate(date);
 }

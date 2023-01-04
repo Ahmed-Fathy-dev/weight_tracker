@@ -34,12 +34,8 @@ class Homepage extends StatelessWidget {
     //   ),
     //   body:const HomeBody(),
     // );
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<LogoutCubit>(
-          create: (context) => injector<LogoutCubit>(),
-        ),
-      ],
+    return BlocProvider<LogoutCubit>(
+      create: (context) => injector<LogoutCubit>(),
       child: const Scaffold(
         body: _HomeBody(),
       ),
@@ -88,42 +84,39 @@ class _HomeBody extends StatelessWidget {
           ],
           bottom: PreferredSize(
             preferredSize: const Size(0, 115),
-            child: BounceInDown(
-              child: Container(
-                height: 125,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '${AppStrings.welcomeUserString}  ',
-                            style: context.txtTheme.titleLarge,
-                          ),
-                          TextSpan(
-                            text: user!.name,
-                            style: context.txtTheme.titleMedium
-                                ?.copyWith(color: context.colorSchemes.primary),
-                          ),
-                        ],
-                      ),
+            child: Container(
+              height: 125,
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${AppStrings.welcomeUserString}  ',
+                          style: context.txtTheme.titleLarge,
+                        ),
+                        TextSpan(
+                          text: user!.name,
+                          style: context.txtTheme.titleMedium
+                              ?.copyWith(color: context.colorSchemes.primary),
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      AppStrings.addWeightString,
-                      style: context.txtTheme.titleMedium,
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const _AddWeightWidget(),
-                  ],
-                ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  Text(
+                    AppStrings.addWeightString,
+                    style: context.txtTheme.titleMedium,
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  const _AddWeightWidget(),
+                ],
               ),
             ),
           ),
@@ -144,12 +137,16 @@ class _AddWeightWidget extends HookWidget {
     final user = context.select((GetUserInfoCubit value) => value.state);
 
     user?.logWtf('user from builder');
-    final weightController = useTextEditingController();
+    final weightTxtState = useState<String>('');
     return Row(
       children: [
         Expanded(
           child: CustomTextField(
-            controller: weightController,
+            onChanged: (String? val) {
+              if (val != null) {
+                weightTxtState.value = val;
+              }
+            },
             fieldKey: 'weight',
             name: AppStrings.weightString,
             keyboardType: TextInputType.number,
@@ -157,22 +154,26 @@ class _AddWeightWidget extends HookWidget {
         ),
         IconButton(
           color: context.colorSchemes.primary,
-          onPressed: () {
-            context.read<CrudWeightBloc>().add(
-                  CreateNewWeight(
-                    UserModel(
-                      id: user!.id,
-                      name: user.name,
-                      token: user.token,
-                      weightModel: WeightModel(
-                        id: user.id,
-                        weight: weightController.text,
-                        time: DateTime.now(),
+          onPressed: weightTxtState.value.isEmpty
+              ? null
+              : () {
+                  context.read<CrudWeightBloc>()
+                    ..add(
+                      CreateNewWeight(
+                        UserModel(
+                          id: user!.id,
+                          name: user.name,
+                          token: user.token,
+                          weightModel: WeightModel(
+                            id: user.id,
+                            weight: weightTxtState.value,
+                            time: DateTime.now(),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-          },
+                    )
+                    ..fetchAllWeights();
+                },
           icon: const Icon(Icons.send),
         ),
       ],

@@ -9,12 +9,12 @@ part of 'weight_model.dart';
 WeightModel _$WeightModelFromJson(Map<String, dynamic> json) => WeightModel(
       id: json['id'] as String,
       weight: json['weight'] as String,
-      time: DateTime.parse(json['time'] as String),
+      time: const TimestampConverter().fromJson(json['time'] as Timestamp),
     );
 
 Map<String, dynamic> _$WeightModelToJson(WeightModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'weight': instance.weight,
-      'time': instance.time.toIso8601String(),
+      'time': const TimestampConverter().toJson(instance.time),
     };
