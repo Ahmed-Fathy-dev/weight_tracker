@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:weight_tracker/src/app/components/animations/shimmer_loading.dart';
+import 'package:weight_tracker/src/app/features/auth/logic/blocs/login_cubit/login_cubit.dart';
 import 'package:weight_tracker/src/app/features/auth/logic/blocs/logout_cubit/logout_cubit.dart';
 import 'package:weight_tracker/src/app/features/auth/views/pages/login_page.dart';
 import 'package:weight_tracker/src/app/features/home/logic/blocs/crud_weight_bloc/crud_weight_bloc.dart';
@@ -15,6 +17,7 @@ import 'package:weight_tracker/src/core/utils/logger_util.dart';
 import 'package:weight_tracker/src/injection/injection_container.dart';
 
 import '../../../../../core/constants/strings.dart';
+import '../../../../../core/services/local_storage/box_storage.dart';
 import '../../../../../core/services/network/response_status.dart';
 import '../../../../components/widgets/custom_text_field.dart';
 import '../../../auth/logic/model/user_model.dart';
@@ -34,8 +37,15 @@ class Homepage extends StatelessWidget {
     //   ),
     //   body:const HomeBody(),
     // );
-    return BlocProvider<LogoutCubit>(
-      create: (context) => injector<LogoutCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<LogoutCubit>(
+          create: (context) => injector<LogoutCubit>(),
+        ),
+        BlocProvider<LoginCubit>.value(
+          value: injector<LoginCubit>(),
+        ),
+      ],
       child: const Scaffold(
         body: _HomeBody(),
       ),
@@ -43,14 +53,43 @@ class Homepage extends StatelessWidget {
   }
 }
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends HookWidget {
   const _HomeBody();
 
   @override
   Widget build(BuildContext context) {
+    useMemoized(
+      () {
+        context.read<CrudWeightBloc>().add(FetchAllWeight());
+      },
+    );
     final user = context.select((GetUserInfoCubit value) => value.state);
 
+    final stateStatus =
+        context.select((CrudWeightBloc value) => value.state.status);
+    final updateStatus =
+        context.select((CrudWeightBloc value) => value.state.canCreate);
+    final scrollController = useScrollController();
+    // final canCreate = useState<bool>(user?.weightModel?.weight == null);
+
+    useEffect(() {
+      scrollController.addListener(() {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          context.read<CrudWeightBloc>().onPagination();
+          logV('from listener sc controller');
+        }
+      });
+      return;
+    }, [scrollController]);
+    stateStatus.logWtf('from homepage builder');
+    if (stateStatus == const ResponseStatus.loading()) {
+      return const Center(
+        child: CupertinoActivityIndicator(),
+      );
+    }
     return CustomScrollView(
+      controller: scrollController,
       slivers: <Widget>[
         SliverAppBar(
           title: const Text(AppStrings.homeString),
@@ -85,7 +124,7 @@ class _HomeBody extends StatelessWidget {
           bottom: PreferredSize(
             preferredSize: const Size(0, 115),
             child: Container(
-              height: 125,
+              height: updateStatus ? 125 : 80,
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +137,7 @@ class _HomeBody extends StatelessWidget {
                           style: context.txtTheme.titleLarge,
                         ),
                         TextSpan(
-                          text: user!.name,
+                          text: user?.name ?? '',
                           style: context.txtTheme.titleMedium
                               ?.copyWith(color: context.colorSchemes.primary),
                         ),
@@ -108,14 +147,22 @@ class _HomeBody extends StatelessWidget {
                   const SizedBox(
                     height: 8,
                   ),
-                  Text(
-                    AppStrings.addWeightString,
-                    style: context.txtTheme.titleMedium,
+                  Visibility(
+                    visible: updateStatus,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppStrings.addWeightString,
+                          style: context.txtTheme.titleMedium,
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        const _AddWeightWidget(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  const _AddWeightWidget(),
                 ],
               ),
             ),
@@ -137,6 +184,7 @@ class _AddWeightWidget extends HookWidget {
     final user = context.select((GetUserInfoCubit value) => value.state);
 
     user?.logWtf('user from builder');
+    user?.logWtf('user from builder');
     final weightTxtState = useState<String>('');
     return Row(
       children: [
@@ -152,29 +200,41 @@ class _AddWeightWidget extends HookWidget {
             keyboardType: TextInputType.number,
           ),
         ),
-        IconButton(
-          color: context.colorSchemes.primary,
-          onPressed: weightTxtState.value.isEmpty
-              ? null
-              : () {
-                  context.read<CrudWeightBloc>()
-                    ..add(
-                      CreateNewWeight(
-                        UserModel(
-                          id: user!.id,
-                          name: user.name,
-                          token: user.token,
-                          weightModel: WeightModel(
-                            id: user.id,
-                            weight: weightTxtState.value,
-                            time: DateTime.now(),
-                          ),
-                        ),
-                      ),
-                    )
-                    ..fetchAllWeights();
-                },
-          icon: const Icon(Icons.send),
+        BlocConsumer<CrudWeightBloc, CrudWeightState>(
+          listenWhen: (previous, current) =>
+              previous.updateStatus != current.updateStatus,
+          listener: (context, state) {
+            if (state.updateStatus == const ResponseStatus.success()) {
+              context.read<CrudWeightBloc>().add(CanCreate(false));
+              state.message.toastAlert(success: true);
+            }
+          },
+          builder: (context, state) {
+            return state.updateStatus == const ResponseStatus.loading()
+                ? const CupertinoActivityIndicator()
+                : IconButton(
+                    color: context.colorSchemes.primary,
+                    onPressed: weightTxtState.value.isEmpty
+                        ? null
+                        : () {
+                            context.read<CrudWeightBloc>().add(
+                                  CreateNewWeight(
+                                    UserModel(
+                                      id: user!.id,
+                                      name: user.name,
+                                      token: user.token,
+                                      weightModel: WeightModel(
+                                        id: user.id,
+                                        weight: weightTxtState.value,
+                                        time: DateTime.now(),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                          },
+                    icon: const Icon(Icons.send),
+                  );
+          },
         ),
       ],
     );

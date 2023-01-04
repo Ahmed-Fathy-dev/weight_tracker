@@ -7,6 +7,7 @@ import '../app/features/auth/logic/blocs/authorized_cubit/authorized_cubit.dart'
 import '../core/Routers/route_name.dart';
 import '../core/Routers/router.dart';
 import '../core/Theme/app_theming.dart';
+import '../core/services/local_storage/box_storage.dart';
 import '../providers.dart';
 
 class AppRoot extends StatelessWidget {
@@ -24,21 +25,26 @@ class AppRoot extends StatelessWidget {
 
 class AppRootView extends StatelessWidget {
   const AppRootView({Key? key}) : super(key: key);
+  String get routeString {
+    final authBox = Boxes.getAuthState();
+
+    final authStatus = authBox.get(authKey);
+    if (authStatus != null && authStatus) {
+      return '/${RouteName.homePage}';
+    } else {
+      return '/${RouteName.loginPage}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthorizedCubit, AuthStatus?>(
-      builder: (context, state) {
-        state?.initialRoute().logWtf('from root');
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: AppThemeData.lightThemeData,
-          themeMode: ThemeMode.light,
-          darkTheme: AppThemeData.darkThemeData,
-          initialRoute: '/${RouteName.loginPage}',
-          onGenerateRoute: AppRouter.onGenerateRoute,
-        );
-      },
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppThemeData.lightThemeData,
+      themeMode: ThemeMode.light,
+      darkTheme: AppThemeData.darkThemeData,
+      initialRoute: routeString,
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }

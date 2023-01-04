@@ -12,6 +12,7 @@ import 'package:weight_tracker/src/core/utils/extensions_methods/widget_ext.dart
 import '../../../../../core/constants/strings.dart';
 import '../../../../components/widgets/custom_text_field.dart';
 import '../../../auth/logic/model/user_model.dart';
+import '../../logic/blocs/get_user_info_cubit/get_user_info_cubit.dart';
 
 class EditeWeightWidget extends HookWidget {
   const EditeWeightWidget({super.key, required this.user});

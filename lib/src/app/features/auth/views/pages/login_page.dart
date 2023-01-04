@@ -14,7 +14,6 @@ import '../../../../../core/services/network/response_status.dart';
 import '../../../../../core/utils/logger_util.dart';
 import '../../../../components/animations/animation_cotainers.dart';
 import '../../../../components/widgets/custom_text_field.dart';
-import '../../../home/logic/blocs/crud_weight_bloc/crud_weight_bloc.dart';
 import '../../logic/blocs/login_cubit/login_cubit.dart';
 
 class LoginPage extends StatelessWidget {
@@ -62,8 +61,8 @@ class LoginBody extends HookWidget {
               listener: (context, state) {
                 if (state.status == const ResponseStatus.success()) {
                   if (state.user != null) {
+                    state.user?.logD('state.user from login');
                     context.read<GetUserInfoCubit>().getUserInfo(state.user!);
-                    context.read<CrudWeightBloc>().add(FetchAllWeight());
                   }
                   context.pushAndRemoveStack(const Homepage());
                   state.message.toastAlert(success: true);

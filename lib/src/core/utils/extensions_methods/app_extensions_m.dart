@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:weight_tracker/src/core/enum/enums.dart';
 import 'package:weight_tracker/src/core/utils/logger_util.dart';
 
+import '../../../app/features/auth/logic/model/local_user_model.dart';
+import '../../../app/features/auth/logic/model/user_model.dart';
 import '../../Routers/route_name.dart';
+import '../../services/local_storage/box_storage.dart';
 
 extension ContextUtils on BuildContext {
   ColorScheme get colorSchemes {
@@ -27,5 +30,20 @@ extension InitRoutFromAuthStatus on AuthStatus? {
     } else {
       return '/${RouteName.loginPage}';
     }
+  }
+}
+
+extension CashedUserM on UserModel {
+  CashedUserModel saveUserModel() {
+    final userM = this;
+    final userMConvert = CashedUserModel()
+      ..id = userM.id
+      ..name = userM.name
+      ..token = userM.token!
+      ..weightId = userM.weightModel?.id ?? ''
+      ..weight = userM.weightModel?.weight ?? ''
+      ..time = userM.weightModel?.time.toIso8601String() ?? '';
+
+    return userMConvert;
   }
 }

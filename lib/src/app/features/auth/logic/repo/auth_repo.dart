@@ -29,6 +29,7 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<Either<Failure, String>> logout() async {
     try {
+      
       await _auth.firebaseLogout();
       return const Right(AppStrings.logoutSuccesString);
     } on FirebaseAuthException catch (e) {

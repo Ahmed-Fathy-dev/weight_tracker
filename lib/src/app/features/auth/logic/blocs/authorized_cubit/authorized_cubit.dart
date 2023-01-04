@@ -3,6 +3,7 @@ import 'package:weight_tracker/src/core/utils/logger_util.dart';
 
 import '../../../../../../core/enum/enums.dart';
 import '../../../../../../core/services/firebase/firebase_auth_service.dart';
+import '../../../../../../core/services/local_storage/box_storage.dart';
 
 class AuthorizedCubit extends Cubit<AuthStatus?> {
   AuthorizedCubit(this._auth) : super(null);
@@ -20,4 +21,5 @@ class AuthorizedCubit extends Cubit<AuthStatus?> {
       emit(AuthStatus.unAuth);
     }
   }
+  
 }

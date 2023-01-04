@@ -10,7 +10,7 @@ class WeightItem extends StatelessWidget {
     required this.popupMenu,
     required this.user,
   });
-  final ActionsPopupMenu popupMenu;
+  final ActionsPopupMenu? popupMenu;
   final UserModel user;
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class WeightItem extends StatelessWidget {
       leading: Text(user.name),
       title: Text(user.weightModel!.weight),
       subtitle: Text(timeFormated),
-      trailing: popupMenu,
+      trailing: popupMenu ?? const SizedBox.shrink(),
     );
   }
 }
