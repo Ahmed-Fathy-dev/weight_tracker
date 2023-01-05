@@ -103,6 +103,7 @@ class _HomeBody extends HookWidget {
             BlocConsumer<LogoutCubit, LogoutState>(
               listener: (context, state) {
                 if (state.status == const ResponseStatus.success()) {
+                  context.read<CrudWeightBloc>().add(CanCreate(true));
                   state.message.toastAlert(success: true);
                   context.pushAndRemoveStack(const LoginPage());
                 } else if (state.status == const ResponseStatus.error()) {

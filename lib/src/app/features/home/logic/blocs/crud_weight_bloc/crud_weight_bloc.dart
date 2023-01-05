@@ -139,6 +139,7 @@ class CrudWeightBloc extends Bloc<CrudWeightEvent, CrudWeightState> {
         deleteStatus: const ResponseStatus.initial(),
         users: null,
         user: null,
+        canCreate: null,
         message: '',
       ),
     );
