@@ -8,6 +8,7 @@ import '../model/user_model.dart';
 
 abstract class AuthRepo {
   Future<Either<Failure, UserModel>> loginRepo(String username);
+  Future<Either<Failure, User?>> linkWithCredentialRepo();
   Future<Either<Failure, String>> logout();
 }
 
@@ -29,9 +30,18 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<Either<Failure, String>> logout() async {
     try {
-      
       await _auth.firebaseLogout();
       return const Right(AppStrings.logoutSuccesString);
+    } on FirebaseAuthException catch (e) {
+      return Left(Failure.fromCode(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User?>> linkWithCredentialRepo() async {
+    try {
+      final userCredential = await _auth.linkWithCredential();
+      return Right(userCredential);
     } on FirebaseAuthException catch (e) {
       return Left(Failure.fromCode(e));
     }

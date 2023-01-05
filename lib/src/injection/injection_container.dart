@@ -51,7 +51,7 @@ void get _authService {
   );
   injector.registerFactory<AuthorizedCubit>(
     () => AuthorizedCubit(
-      injector<FirebaseAuthService>(),
+      injector<AuthRepo>(),
     ),
   );
 }

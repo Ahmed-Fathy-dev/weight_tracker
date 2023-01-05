@@ -16,6 +16,7 @@ class FirebaseAuthService {
       token: token,
       name: username,
     );
+    userModel.logD('from service firebase');
     return userModel;
   }
 
@@ -41,6 +42,12 @@ class FirebaseAuthService {
     // });
     authStatus.logW('after stream');
     return authStatus;
+  }
+
+  Future<User?> linkWithCredential() async {
+    final currentUser = _firebaseAuth.currentUser;
+
+    return currentUser;
   }
 
   Future<void> firebaseLogout() async {

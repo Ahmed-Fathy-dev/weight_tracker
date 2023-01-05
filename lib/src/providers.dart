@@ -9,7 +9,7 @@ import 'injection/injection_container.dart';
 
 List<BlocProvider> providers = [
   BlocProvider<AuthorizedCubit>(
-    create: (context) => injector<AuthorizedCubit>()..getAuthStatus(),
+    create: (context) => injector<AuthorizedCubit>(),
   ),
   BlocProvider<GetUserInfoCubit>(
     create: (_) => injector<GetUserInfoCubit>(),

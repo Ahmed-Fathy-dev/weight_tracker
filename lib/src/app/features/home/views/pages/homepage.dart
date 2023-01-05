@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weight_tracker/src/app/components/animations/shimmer_loading.dart';
+import 'package:weight_tracker/src/app/features/auth/logic/blocs/authorized_cubit/authorized_cubit.dart';
 import 'package:weight_tracker/src/app/features/auth/logic/blocs/login_cubit/login_cubit.dart';
 import 'package:weight_tracker/src/app/features/auth/logic/blocs/logout_cubit/logout_cubit.dart';
 import 'package:weight_tracker/src/app/features/auth/views/pages/login_page.dart';
@@ -61,6 +62,7 @@ class _HomeBody extends HookWidget {
     useMemoized(
       () {
         context.read<CrudWeightBloc>().add(FetchAllWeight());
+        context.read<AuthorizedCubit>().redirectUser();
       },
     );
     final user = context.select((GetUserInfoCubit value) => value.state);

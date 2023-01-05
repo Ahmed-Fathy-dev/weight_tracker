@@ -25,7 +25,7 @@ class UsersWeightsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.select((GetUserInfoCubit value) => value.state);
 
-    logD('$user from builder');
+    logger.d(user ,'from builder');
     return BlocConsumer<CrudWeightBloc, CrudWeightState>(
       listenWhen: (previous, current) =>
           previous.deleteStatus != current.deleteStatus,

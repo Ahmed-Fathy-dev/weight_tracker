@@ -43,7 +43,7 @@ extension CashedUserM on UserModel {
       ..weightId = userM.weightModel?.id ?? ''
       ..weight = userM.weightModel?.weight ?? ''
       ..time = userM.weightModel?.time.toIso8601String() ?? '';
-
+    logger.d(userMConvert);
     return userMConvert;
   }
 }
